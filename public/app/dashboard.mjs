@@ -4,10 +4,28 @@ import { summarize } from './analytics.mjs';
 
 const $ = id => document.getElementById(id);
 const descriptions = {
-  adaptive: 'Adjusts the first suggestion using your pre-test responses. Help escalates when you get stuck.',
+  adaptive: 'Uses your pre-test answers and confidence to choose the first help you see for each practice question.',
   interaction: 'Uses your attempts on the current exercise to adjust help.',
   fixed: 'Offers a curated hint whenever you ask for assistance.',
   direct: 'Shows a worked answer whenever you ask for assistance.',
+};
+const phaseGuidance = {
+  pre: 'Predict the output on your own, then rate how sure you are.',
+  practice: 'Choose Request assistance for help with this question.',
+  transfer: 'Apply what you practised to a new question on your own.',
+};
+const helpReasons = {
+  learner_override: 'You chose to see a worked answer.',
+  direct_policy: 'This mode gives a worked answer when you ask for help.',
+  fixed_policy: 'This mode gives a hint when you ask for help.',
+  repeated_difficulty: 'You have tried this question twice. Here is a walkthrough.',
+  first_difficulty: 'You have tried this question once. A hint can help with your next attempt.',
+  interaction_default: 'This mode starts with a hint and adjusts after you try the question.',
+  limited_evidence: 'There are too few pre-test responses on this topic, so the session starts with a hint.',
+  confidence_above_probe_score: 'Your confidence on this topic was higher than your pre-test score, so the prompt asks you to verify your reasoning.',
+  low_probe_score: 'Your pre-test answers suggest a worked answer may help with this topic.',
+  mixed_probe_score: 'Some of your pre-test answers on this topic were correct, so the session starts with a hint.',
+  high_probe_score: 'You did well on this topic in the pre-test, so the prompt asks you to explain your reasoning.',
 };
 const strategyLabels = { hint: 'Hint', verify: 'Verification', reflect: 'Reflection', worked: 'Worked answer' };
 let session;
@@ -36,6 +54,7 @@ function renderTask() {
   $('item-position').textContent = (session.index + 1) + ' / ' + TASKS.length;
   $('progress').value = session.index;
   $('question').textContent = task.prompt;
+  $('phase-guide').textContent = phaseGuidance[task.phase];
   $('code').textContent = task.code;
   $('choices').replaceChildren(...task.choices.map((answer, index) => {
     const label = document.createElement('label');
@@ -66,7 +85,9 @@ function showAssistance(override) {
     reflect: 'Reflection · Which Python rule explains your choice? Try stating the rule before submitting.',
     hint: 'Hint · ' + task.hint,
   };
-  $('feedback').textContent = messages[request.strategy];
+  const reason = textElement('span', 'Why this help? ' + helpReasons[request.reason]);
+  reason.className = 'help-reason';
+  $('feedback').replaceChildren(document.createTextNode(messages[request.strategy]), reason);
 }
 
 function showResults() {

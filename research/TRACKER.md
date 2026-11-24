@@ -30,3 +30,7 @@
 The answer-position audit found 3/5/0 correct picks across the three option positions in the demo pre-test, 2/4/2 in practice and 3/4/1 in transfer. Preserve the published demo bank as a versioned baseline. Balance answer positions in the dedicated study bank and freeze equivalent baseline, immediate transfer and delayed transfer forms after expert review. Each form needs documented concept coverage, parallel cognitive demands and fresh code examples. Log the form and displayed option order in the approved study export, and run scoring and item-balance checks before a feasibility pilot.
 
 The next implementation boundary is a separate protected study workflow with server-side answer keys and allocation. Model-generated assistance and participant enrollment remain gated by their respective review and approval steps.
+
+## v0.5 usability follow-up
+
+The landing page shows how two learners can receive different support on the same Python concept. Instructions appear at each phase of the session. Each practice response explains the policy reason for the chosen type of help. Assessment items, policy rules, and export format are unchanged.

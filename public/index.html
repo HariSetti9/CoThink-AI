@@ -21,7 +21,7 @@
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">PROGRAMMING EDUCATION RESEARCH</p>
       <h1 id="page-title">Learning lab<span>.</span></h1>
-      <p>Practice Python with adjustable assistance, then see how you perform on new questions on your own.</p>
+      <p>Predict what short Python programs print. Ask for help during practice, then try new questions on your own.</p>
       <div class="inventory"><span><strong id="item-count">24</strong> exercises</span><span><strong id="concept-count">4</strong> concepts</span><span><strong>3</strong> phases</span></div>
     </section>
     <div class="workspace">
@@ -29,7 +29,7 @@
         <div id="setup">
           <p class="eyebrow">PYTHON CODE TRACING</p>
           <h2 id="session-title" tabindex="-1">Session setup</h2>
-          <p>Choose an assistance policy. Help is available during practice.</p>
+          <p>Start with a short pre-test. In the next phase, select <strong>Request assistance</strong> whenever you want help.</p>
           <label for="mode">Assistance policy</label>
           <select id="mode" aria-describedby="mode-description">
             <option value="adaptive">Competence-aware</option>
@@ -44,6 +44,7 @@
           <div class="lesson-top"><span id="stage" class="eyebrow"></span><span id="item-position" class="fine"></span></div>
           <progress id="progress" aria-label="Session progress"></progress>
           <h2 id="question" tabindex="-1"></h2>
+          <p id="phase-guide" class="fine"></p>
           <pre><code id="code"></code></pre>
           <form id="answer-form">
             <fieldset><legend>Choose the output</legend><div class="choices" id="choices"></div></fieldset>
@@ -76,6 +77,10 @@
           <li data-phase="practice"><div><strong>Assisted practice</strong><p>Request help as you work.</p></div><span class="phase-status">Pending</span></li>
           <li data-phase="transfer"><div><strong>Unaided transfer</strong><p>Apply what you know to new exercises.</p></div><span class="phase-status">Pending</span></li>
         </ol>
+        <div class="help-example">
+          <h3>How adaptive help changes</h3>
+          <p>On the same Python loop, a learner who struggled and felt unsure may see a worked answer. A learner who did well may be asked to explain why the loop stops where it does.</p>
+        </div>
         <p class="fine privacy">Responses stay in this browser session. Export is optional.</p>
       </aside>
     </div>

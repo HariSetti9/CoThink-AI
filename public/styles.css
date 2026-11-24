@@ -61,6 +61,8 @@ button:disabled { opacity: .55; cursor: default; }
 .journey li { display: flex; align-items: start; justify-content: space-between; gap: .6rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
 .journey li p { font-size: .85rem; }
 .journey [aria-current="step"] .phase-status { background: var(--sprout); color: var(--green); }
+.help-example { border-left: 3px solid #a5b99f; padding-left: .8rem; margin-top: 1.2rem; }
+.help-example p { font-size: .85rem; margin-top: .25rem; }
 .privacy { margin-top: 1.2rem; }
 .lesson-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
 progress { width: 100%; accent-color: var(--green); margin: .35rem 0 .8rem; }
@@ -76,6 +78,7 @@ output { float: right; color: var(--green); }
 .actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
 .feedback:empty { display: none; }
 .feedback { background: var(--sprout); color: var(--green); border-radius: 8px; padding: .65rem .85rem; margin: .8rem 0; }
+.help-reason { display: block; margin-top: .35rem; font-size: .85rem; }
 .analytics { margin-top: 1rem; }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: .6rem; margin: 1rem 0 1.5rem; }
 .metric { border: 1px solid var(--line); border-radius: 10px; padding: .65rem .85rem; }
