@@ -24,7 +24,6 @@ for (const task of TASKS) {
     const result = spawnSync(process.env.COTHINK_PYTHON ?? 'python', ['-I', '-c', task.code], { encoding: 'utf8', timeout: 3000 });
     assert.ifError(result.error);
     assert.equal(result.status, 0, result.stderr);
-    const normalize = text => text.trim().replaceAll(/,\s+/g, ',');
-    assert.equal(normalize(result.stdout), normalize(task.choices[task.answer]));
+    assert.equal(result.stdout.trimEnd(), task.choices[task.answer]);
   });
 }
