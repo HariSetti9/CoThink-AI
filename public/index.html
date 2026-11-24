@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CoThink AI is a research prototype for competence-aware programming assistance.">
+  <title>CoThink AI | Learning lab</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app/dashboard.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="header">
+    <div class="frame header-inner">
+      <a href="#main" class="brand"><span class="brand-mark" aria-hidden="true"></span>CoThink AI</a>
+      <nav aria-label="Workspace"><a href="#session">Session</a><a href="#analytics">Analytics</a><a href="#research">Research</a></nav>
+      <span class="version">Prototype v0.5</span>
+    </div>
+  </header>
+  <main id="main" class="frame">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">PROGRAMMING EDUCATION RESEARCH</p>
+      <h1 id="page-title">Learning lab<span>.</span></h1>
+      <p>Practice Python with adjustable assistance, then see how you perform on new questions on your own.</p>
+      <div class="inventory"><span><strong id="item-count">24</strong> exercises</span><span><strong id="concept-count">4</strong> concepts</span><span><strong>3</strong> phases</span></div>
+    </section>
+    <div class="workspace">
+      <section class="panel session" id="session" aria-labelledby="session-title">
+        <div id="setup">
+          <p class="eyebrow">PYTHON CODE TRACING</p>
+          <h2 id="session-title" tabindex="-1">Session setup</h2>
+          <p>Choose an assistance policy. Help is available during practice.</p>
+          <label for="mode">Assistance policy</label>
+          <select id="mode" aria-describedby="mode-description">
+            <option value="adaptive">Competence-aware</option>
+            <option value="interaction">Interaction-only</option>
+            <option value="fixed">Fixed hints</option>
+            <option value="direct">Direct answers</option>
+          </select>
+          <p class="fine" id="mode-description"></p>
+          <button class="primary" type="button" id="start">Start session <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="lesson" hidden>
+          <div class="lesson-top"><span id="stage" class="eyebrow"></span><span id="item-position" class="fine"></span></div>
+          <progress id="progress" aria-label="Session progress"></progress>
+          <h2 id="question" tabindex="-1"></h2>
+          <pre><code id="code"></code></pre>
+          <form id="answer-form">
+            <fieldset><legend>Choose the output</legend><div class="choices" id="choices"></div></fieldset>
+            <label for="confidence">Confidence in your answer <output id="confidence-value" for="confidence">50%</output></label>
+            <input id="confidence" type="range" value="50" min="0" max="100">
+            <div class="actions">
+              <button id="submit" type="submit" class="primary">Check answer</button>
+              <button id="help" type="button">Request assistance</button>
+              <button id="override" type="button">Request worked answer</button>
+            </div>
+          </form>
+          <p id="feedback" class="feedback" role="status" aria-atomic="true"></p>
+          <button class="primary" type="button" id="next" hidden>Next exercise <span aria-hidden="true">→</span></button>
+        </div>
+        <div id="finished" hidden>
+          <p class="eyebrow">PYTHON CODE TRACING</p>
+          <h2 tabindex="-1" id="finished-title">Session complete</h2>
+          <p>Review your results below or download a record of your answers and assistance requests.</p>
+          <div class="actions">
+            <button type="button" class="primary export-session">Export session JSON</button>
+            <button type="button" id="restart">New session</button>
+          </div>
+        </div>
+      </section>
+      <aside class="panel journey" aria-labelledby="journey-title">
+        <p class="eyebrow">SESSION PROGRESS</p>
+        <h2 id="journey-title">Learning sequence</h2>
+        <ol>
+          <li data-phase="pre"><div><strong>Independent pre-test</strong><p>Establish your baseline.</p></div><span class="phase-status">Pending</span></li>
+          <li data-phase="practice"><div><strong>Assisted practice</strong><p>Request help as you work.</p></div><span class="phase-status">Pending</span></li>
+          <li data-phase="transfer"><div><strong>Unaided transfer</strong><p>Apply what you know to new exercises.</p></div><span class="phase-status">Pending</span></li>
+        </ol>
+        <p class="fine privacy">Responses stay in this browser session. Export is optional.</p>
+      </aside>
+    </div>
+    <section class="panel analytics" id="analytics" aria-labelledby="analytics-title">
+      <div class="section-heading"><div><p class="eyebrow">LEARNING ANALYTICS</p><h2 id="analytics-title">Session results</h2></div></div>
+      <p id="empty-results">Complete a session to see your scores, confidence calibration and assistance use.</p>
+      <div id="results" hidden>
+        <div class="metrics" id="metrics"></div>
+        <div class="report">
+          <div>
+            <h3>Independent scores by concept</h3>
+            <table><thead><tr><th scope="col">Concept</th><th scope="col">Pre-test</th><th scope="col">Transfer</th></tr></thead><tbody id="concept-results"></tbody></table>
+          </div>
+          <div><h3>Assistance requested</h3><dl id="strategy-results"></dl></div>
+        </div>
+        <p class="fine">Scores describe this session. Changes may reflect differences in item difficulty. The Brier score measures the gap between confidence and correctness, with lower values indicating better calibration on these items.</p>
+      </div>
+    </section>
+    <section id="research" class="research" aria-labelledby="research-title">
+      <p class="eyebrow">RESEARCH</p>
+      <h2 id="research-title">Can adaptive help improve unaided transfer?</h2>
+      <p>The prototype uses curated Python exercises and a rule-based policy. The proposed study compares competence-aware and interaction-only assistance on a later unaided assessment. No participant study is running through this demo.</p>
+      <a href="https://github.com/HariSetti9/CoThink-AI">Source code and research protocol <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+  <footer class="frame footer">CoThink AI <span>AI-assisted development</span></footer>
+</body>
+</html>

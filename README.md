@@ -1,27 +1,26 @@
 # CoThink AI
 
-Competence-aware adaptive programming assistance — research prototype v0.3.
+CoThink AI v0.5 is a Human-Centered AI research prototype for competence-aware adaptive help in introductory Python code tracing. [Open the demonstration](https://cothink-ai.vercel.app/).
 
-[Public demonstration](https://cothink-ai-setti-haris-projects.vercel.app)
+## Run and test
 
-## Run locally
-Open index.html in a browser. No dependencies or API keys required.
+Use Node.js 22 or later and Python 3 on PATH. No packages or API keys are required.
 
-## Features
-Three assistance modes, independent pre-test, assisted practice, unaided transfer, confidence ratings, descriptive analytics and local JSON export. No automatic research data collection. Curated content, not an LLM.
+```sh
+npm start
+npm test
+```
 
-## Research question
-Does assistance adapted to independent competence improve unaided programming transfer compared with fixed hints? This is a candidate question, not a novelty or efficacy claim.
+Open http://127.0.0.1:4173/. Run `npm test` from another terminal or stop the local server first. Set `COTHINK_PYTHON` if Python is installed under a different command.
 
-## Proposed study
-After ethics approval and consent, randomize learners to adaptive or fixed assistance with matched tasks, assessments and time. Primary outcome: unaided transfer score adjusted for baseline. Secondary: delayed transfer, Brier score, workload and assistance use. Determine sample size before confirmatory testing. The demo uses only three items per phase and is unsuitable for confirmatory research; expand and validate the task bank first.
+## Demonstration and architecture
 
-## Limitations
-Single binary pre-test item per concept is a noisy competence proxy. Assistance is optional and overrides may confound comparisons. Client-side answers are inspectable. Practice scores include retries. No human study has been conducted. Six policy scenarios checked during v0.3 development; browser end-to-end testing pending.
+- The demo has 24 code-tracing questions across four concepts. Each concept has two questions per phase. The phases are independent pre-test, assisted practice and unaided transfer.
+- Four demonstration policies share a versioned exercise bank and practice workflow. The adaptive and interaction-only policies share the same escalation after errors. The adaptive policy also uses same-concept pre-test performance and confidence for the first recommendation.
+- Analytics show independent scores, first-attempt practice accuracy, unaided first-attempt practice accuracy, final practice accuracy, assistance and overrides. Session rows retain the v0.4 fields and add stable item IDs, attempt details and policy decisions. A JSON export is available at completion.
+- `public/app/` holds independent modules for the task bank, policy, session flow, analytics and dashboard. Vercel serves `public/`. The separate `server/` directory contains a Gemini draft helper with mocked verification. The demo has no Gemini route or server-side response collection.
+- The browser holds responses in memory for the session. There is no login or automatic export. Answer keys ship with the public demo and the items have not been validated psychometrically. These constraints prevent the demo from serving as a controlled study platform.
 
-## References
-- Amershi et al., Guidelines for Human-AI Interaction, CHI 2019. https://doi.org/10.1145/3290605.3300233
-- Kazemitabaar et al., CodeAid, CHI 2024. https://doi.org/10.1145/3613904.3642773
+## Research
 
-## Disclosure
-AI-assisted implementation and documentation. Human review, contribution and empirical validation are required before academic claims or submission.
+See the [literature review](research/LITERATURE.md), [draft protocol](research/PROTOCOL.md) and [development tracker](research/TRACKER.md). The code, dataset additions, and text received AI assistance. Human review and empirical validation are pending. No participant study has been conducted.
