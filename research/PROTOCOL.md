@@ -1,4 +1,6 @@
-# Draft study protocol
+# Draft study protocol for the Python testbed
+
+For the candidate multi-domain design, see [the evaluation framework](EVALUATION.md). This earlier Python-specific design documents the planned probe ablation.
 
 **Status:** Design for review. Recruitment and participant data collection require prior institutional ethics approval and consent. The public v0.5 demo is for demonstration.
 

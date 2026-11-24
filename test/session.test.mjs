@@ -91,7 +91,7 @@ for (const mode of Object.keys(MODES)) {
     const session = createSession(mode);
     for (const task of TASKS) {
       assert.equal(currentTask(session).id, task.id);
-      assert.equal(Boolean(requestAssistance(session)), task.phase === 'practice');
+      assert.equal(Boolean(requestAssistance(session)), task.phase === 'practice' && mode !== 'unaided');
       assert.equal(submitAnswer(session, task.answer, 80).sealed, true);
       assert.equal(advance(session), true);
     }
@@ -100,13 +100,15 @@ for (const mode of Object.keys(MODES)) {
     const receipt = exportSession(session);
     assert.equal(receipt.schemaVersion, 2);
     assert.equal(receipt.mode, mode);
+    assert.equal(receipt.domain, 'python');
+    assert.equal(receipt.datasetVersion, 'python-tracing-v2');
     assert.equal(receipt.logs.length, 24);
     assert.equal(receipt.logs.filter(log => log.phase === 'transfer').every(log => log.requests.length === 0), true);
     const stats = summarize(receipt.logs);
     assert.equal(stats.change, 0);
     assert.ok(Math.abs(stats.brier - 0.04) < 0.000001);
-    assert.equal(stats.requestCount, 8);
-    assert.equal(stats.firstUnaidedPractice.pct, null);
+    assert.equal(stats.requestCount, mode === 'unaided' ? 0 : 8);
+    assert.equal(stats.firstUnaidedPractice.pct, mode === 'unaided' ? 100 : null);
   });
 }
 

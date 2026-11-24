@@ -1,5 +1,5 @@
-import { CONCEPTS, TASKS } from './tasks.mjs';
-import { PHASES, advance, createSession, currentTask, exportSession, requestAssistance, submitAnswer } from './session.mjs';
+import { DOMAINS } from './domains.mjs';
+import { PHASES, advance, canRequestAssistance, createSession, currentTask, exportSession, requestAssistance, submitAnswer } from './session.mjs';
 import { summarize } from './analytics.mjs';
 
 const $ = id => document.getElementById(id);
@@ -8,9 +8,9 @@ const descriptions = {
   interaction: 'Uses your attempts on the current exercise to adjust help.',
   fixed: 'Offers a curated hint whenever you ask for assistance.',
   direct: 'Shows a worked answer whenever you ask for assistance.',
+  unaided: 'Work independently throughout the session. Practice gives correctness feedback after each attempt.',
 };
 const phaseGuidance = {
-  pre: 'Predict the output on your own, then rate how sure you are.',
   practice: 'Choose Request assistance for help with this question.',
   transfer: 'Apply what you practised to a new question on your own.',
 };
@@ -29,6 +29,10 @@ const helpReasons = {
 };
 const strategyLabels = { hint: 'Hint', verify: 'Verification', reflect: 'Reflection', worked: 'Worked answer' };
 let session;
+
+function phaseLabel(phase, mode) {
+  return phase === 'practice' && mode === 'unaided' ? 'Unaided practice' : PHASES[phase];
+}
 
 function textElement(tag, text) {
   const element = document.createElement(tag);
@@ -49,12 +53,15 @@ function renderJourney(activePhase, complete = false) {
 
 function renderTask() {
   const task = currentTask(session);
+  const domain = session.domain;
   renderJourney(task.phase);
-  $('stage').textContent = PHASES[task.phase] + ' · ' + CONCEPTS[task.concept];
-  $('item-position').textContent = (session.index + 1) + ' / ' + TASKS.length;
+  $('stage').textContent = phaseLabel(task.phase, session.mode) + ' · ' + domain.concepts[task.concept];
+  $('item-position').textContent = (session.index + 1) + ' / ' + domain.tasks.length;
   $('progress').value = session.index;
   $('question').textContent = task.prompt;
-  $('phase-guide').textContent = phaseGuidance[task.phase];
+  $('phase-guide').textContent = task.phase === 'pre' ? domain.preGuide : task.phase === 'practice' && session.mode === 'unaided' ? 'Work through this task on your own.' : phaseGuidance[task.phase];
+  $('passage').setAttribute('aria-label', domain.passageLabel);
+  $('passage').classList.toggle('rule-passage', domain.id === 'reasoning');
   $('code').textContent = task.code;
   $('choices').replaceChildren(...task.choices.map((answer, index) => {
     const label = document.createElement('label');
@@ -69,7 +76,7 @@ function renderTask() {
   $('confidence').disabled = false;
   $('confidence-value').value = '50%';
   $('submit').disabled = false;
-  $('help').hidden = $('override').hidden = task.phase !== 'practice';
+  $('help').hidden = $('override').hidden = !canRequestAssistance(session);
   $('next').hidden = true;
   $('feedback').textContent = '';
   $('question').focus();
@@ -80,9 +87,9 @@ function showAssistance(override) {
   if (!request) return;
   const task = currentTask(session);
   const messages = {
-    worked: 'Worked answer · ' + task.choices[task.answer] + '. ' + task.hint,
-    verify: 'Verification · Trace the expression one step at a time, then compare your prediction with the answer choices.',
-    reflect: 'Reflection · Which Python rule explains your choice? Try stating the rule before submitting.',
+    worked: 'Worked answer · ' + task.choices[task.answer].replace(/\.$/, '') + '. ' + (task.explanation ?? task.hint),
+    verify: 'Verification · ' + session.domain.verification,
+    reflect: 'Reflection · ' + session.domain.reflection,
     hint: 'Hint · ' + task.hint,
   };
   const reason = textElement('span', 'Why this help? ' + helpReasons[request.reason]);
@@ -91,7 +98,8 @@ function showAssistance(override) {
 }
 
 function showResults() {
-  const stats = summarize(session.logs);
+  const domain = session.domain;
+  const stats = summarize(session.logs, Object.keys(domain.concepts));
   const fraction = metric => metric.total ? metric.correct + ' / ' + metric.total : '—';
   const signedChange = (stats.change > 0 ? '+' : '') + stats.change.toFixed(1) + ' pp';
   const metrics = [
@@ -108,7 +116,7 @@ function showResults() {
   }));
   $('concept-results').replaceChildren(...stats.concepts.map(item => {
     const row = document.createElement('tr');
-    const cell = textElement('th', CONCEPTS[item.concept]);
+    const cell = textElement('th', domain.concepts[item.concept]);
     cell.scope = 'row';
     row.append(cell, textElement('td', fraction(item.pre)), textElement('td', fraction(item.transfer)));
     return row;
@@ -123,19 +131,31 @@ function showResults() {
   }));
   $('lesson').hidden = $('empty-results').hidden = true;
   $('finished').hidden = $('results').hidden = false;
+  $('finished-domain').textContent = domain.label;
   $('finished-title').focus();
   renderJourney(null, true);
 }
 
-$('item-count').textContent = TASKS.length;
-$('concept-count').textContent = Object.keys(CONCEPTS).length;
-$('progress').max = TASKS.length;
-$('mode').addEventListener('change', () => {
-  $('mode-description').textContent = descriptions[$('mode').value];
-});
-$('mode').dispatchEvent(new Event('change'));
+function selectedDomain() {
+  return document.querySelector('input[name="domain"]:checked').value;
+}
+
+function updateSetup() {
+  const domain = DOMAINS[selectedDomain()];
+  const mode = $('mode').value;
+  $('item-count').textContent = domain.tasks.length;
+  $('concept-count').textContent = Object.keys(domain.concepts).length;
+  $('progress').max = domain.tasks.length;
+  $('mode-description').textContent = descriptions[mode];
+  $('practice-label').textContent = phaseLabel('practice', mode);
+  $('practice-description').textContent = mode === 'unaided' ? 'Work through new tasks independently.' : 'Request help as you work.';
+}
+
+$('domains').addEventListener('change', updateSetup);
+$('mode').addEventListener('change', updateSetup);
+updateSetup();
 $('start').addEventListener('click', () => {
-  session = createSession($('mode').value);
+  session = createSession($('mode').value, selectedDomain());
   $('setup').hidden = true;
   $('lesson').hidden = false;
   renderTask();
@@ -163,19 +183,19 @@ $('answer-form').addEventListener('submit', event => {
   if (!result) return;
   if (!result.sealed) {
     selected.checked = false;
-    $('feedback').textContent = 'Try another answer or request assistance.';
+    $('feedback').textContent = canRequestAssistance(session) ? 'Try another answer or request assistance.' : 'Try another answer.';
     selected.focus();
     return;
   }
 
-  $('feedback').textContent = task.phase === 'practice'
-    ? (result.correct ? 'Correct. ' : 'Practice complete. ') + task.hint
-    : 'Response recorded.';
+  const practiceText = result.correct ? 'Correct.' : 'Practice complete.';
+  const explanation = session.domain.showPracticeExplanation && session.mode !== 'unaided' ? ' ' + task.hint : '';
+  $('feedback').textContent = task.phase === 'practice' ? practiceText + explanation : 'Response recorded.';
   for (const input of $('choices').querySelectorAll('input')) input.disabled = true;
   $('submit').disabled = $('confidence').disabled = true;
   $('help').hidden = $('override').hidden = true;
   $('next').hidden = false;
-  $('next').firstChild.textContent = session.index + 1 === TASKS.length ? 'View results ' : 'Next exercise ';
+  $('next').firstChild.textContent = session.index + 1 === session.domain.tasks.length ? 'View results ' : 'Next exercise ';
   $('next').focus();
 });
 $('help').addEventListener('click', () => showAssistance(false));

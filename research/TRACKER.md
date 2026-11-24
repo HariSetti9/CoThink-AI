@@ -34,3 +34,15 @@ The next implementation boundary is a separate protected study workflow with ser
 ## v0.5 usability follow-up
 
 The landing page shows how two learners can receive different support on the same Python concept. Instructions appear at each phase of the session. Each practice response explains the policy reason for the chosen type of help. Assessment items, policy rules, and export format are unchanged.
+
+## Multi-domain engine candidate
+
+| Milestone | Evidence |
+| --- | --- |
+| Permanent scope | [PROJECT_VISION.md](../PROJECT_VISION.md) committed before implementation. |
+| Domain-independent policy and session | [Architecture](ARCHITECTURE.md), versioned policy and dataset, and synthetic injection of a third unregistered domain. |
+| Preserve v0.5 | Python items stay byte-for-byte unchanged. Original assisted modes, analytics and JSON fields remain available, with an additive domain field. |
+| Conditional reasoning | [Instrument blueprint](REASONING_ASSESSMENT.md) and 24 truth-table checks. Expert review, psychometric checks and human validation are pending. |
+| Research controls | [Four-arm framework](EVALUATION.md) plus interaction-only ablation. Public UI demonstrates arms and records synthetic QA. |
+| Literature | Updated [evidence map](LITERATURE.md) on cognitive offloading, adaptive assistance, human–AI collaboration and appropriate reliance. Novelty and efficacy remain open. |
+| Release boundary | Development candidate on the adaptive engine branch. Verified v0.5 remains production while Preview is tested. |

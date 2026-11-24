@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CoThink AI is a research prototype for competence-aware programming assistance.">
-  <title>CoThink AI | Learning lab</title>
+  <meta name="description" content="CoThink AI studies how AI can adapt its help to a person's understanding and task.">
+  <title>CoThink AI | Collaboration lab</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app/dashboard.mjs"></script>
 </head>
@@ -14,28 +14,35 @@
     <div class="frame header-inner">
       <a href="#main" class="brand"><span class="brand-mark" aria-hidden="true"></span>CoThink AI</a>
       <nav aria-label="Workspace"><a href="#session">Session</a><a href="#analytics">Analytics</a><a href="#research">Research</a></nav>
-      <span class="version">Prototype v0.5</span>
+      <span class="version">Preview v0.6</span>
     </div>
   </header>
   <main id="main" class="frame">
     <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">PROGRAMMING EDUCATION RESEARCH</p>
-      <h1 id="page-title">Learning lab<span>.</span></h1>
-      <p>Predict what short Python programs print. Ask for help during practice, then try new questions on your own.</p>
-      <div class="inventory"><span><strong id="item-count">24</strong> exercises</span><span><strong id="concept-count">4</strong> concepts</span><span><strong>3</strong> phases</span></div>
+      <p class="eyebrow">HUMAN–AI COLLABORATION</p>
+      <h1 id="page-title">AI help that adapts<span>.</span></h1>
+      <p>CoThink uses what you know about a task to choose when to offer a hint, a question, or a worked answer.</p>
+      <div class="inventory" aria-live="polite"><span><strong id="item-count">24</strong> exercises</span><span><strong id="concept-count">2</strong> concepts</span><span><strong>3</strong> phases</span></div>
     </section>
     <div class="workspace">
       <section class="panel session" id="session" aria-labelledby="session-title">
         <div id="setup">
-          <p class="eyebrow">PYTHON CODE TRACING</p>
           <h2 id="session-title" tabindex="-1">Session setup</h2>
-          <p>Start with a short pre-test. In the next phase, select <strong>Request assistance</strong> whenever you want help.</p>
+          <p>Choose a testbed to see how the same engine adapts across tasks.</p>
+          <fieldset id="domains">
+            <legend>Task domain</legend>
+            <div class="domain-options">
+              <label><input type="radio" name="domain" value="reasoning" checked><span><strong>Logical reasoning</strong><small>Decide what follows from a rule and a fact.</small></span></label>
+              <label><input type="radio" name="domain" value="python"><span><strong>Python code tracing</strong><small>Predict what short programs print.</small></span></label>
+            </div>
+          </fieldset>
           <label for="mode">Assistance policy</label>
           <select id="mode" aria-describedby="mode-description">
             <option value="adaptive">Competence-aware</option>
             <option value="interaction">Interaction-only</option>
             <option value="fixed">Fixed hints</option>
             <option value="direct">Direct answers</option>
+            <option value="unaided">Unaided practice</option>
           </select>
           <p class="fine" id="mode-description"></p>
           <button class="primary" type="button" id="start">Start session <span aria-hidden="true">→</span></button>
@@ -45,9 +52,9 @@
           <progress id="progress" aria-label="Session progress"></progress>
           <h2 id="question" tabindex="-1"></h2>
           <p id="phase-guide" class="fine"></p>
-          <pre><code id="code"></code></pre>
+          <pre id="passage"><code id="code"></code></pre>
           <form id="answer-form">
-            <fieldset><legend>Choose the output</legend><div class="choices" id="choices"></div></fieldset>
+            <fieldset><legend>Choose an answer</legend><div class="choices" id="choices"></div></fieldset>
             <label for="confidence">Confidence in your answer <output id="confidence-value" for="confidence">50%</output></label>
             <input id="confidence" type="range" value="50" min="0" max="100">
             <div class="actions">
@@ -60,7 +67,7 @@
           <button class="primary" type="button" id="next" hidden>Next exercise <span aria-hidden="true">→</span></button>
         </div>
         <div id="finished" hidden>
-          <p class="eyebrow">PYTHON CODE TRACING</p>
+          <p class="eyebrow" id="finished-domain"></p>
           <h2 tabindex="-1" id="finished-title">Session complete</h2>
           <p>Review your results below or download a record of your answers and assistance requests.</p>
           <div class="actions">
@@ -74,12 +81,12 @@
         <h2 id="journey-title">Learning sequence</h2>
         <ol>
           <li data-phase="pre"><div><strong>Independent pre-test</strong><p>Establish your baseline.</p></div><span class="phase-status">Pending</span></li>
-          <li data-phase="practice"><div><strong>Assisted practice</strong><p>Request help as you work.</p></div><span class="phase-status">Pending</span></li>
+          <li data-phase="practice"><div><strong id="practice-label">Practice</strong><p id="practice-description">Work through a set of new tasks.</p></div><span class="phase-status">Pending</span></li>
           <li data-phase="transfer"><div><strong>Unaided transfer</strong><p>Apply what you know to new exercises.</p></div><span class="phase-status">Pending</span></li>
         </ol>
         <div class="help-example">
           <h3>How adaptive help changes</h3>
-          <p>On the same Python loop, a learner who struggled and felt unsure may see a worked answer. A learner who did well may be asked to explain why the loop stops where it does.</p>
+          <p>On the same task, one person may get a worked answer while another is prompted to explain their reasoning. The session explains why each suggestion was chosen.</p>
         </div>
         <p class="fine privacy">Responses stay in this browser session. Export is optional.</p>
       </aside>
@@ -102,8 +109,8 @@
     <section id="research" class="research" aria-labelledby="research-title">
       <p class="eyebrow">RESEARCH</p>
       <h2 id="research-title">Can adaptive help improve unaided transfer?</h2>
-      <p>The prototype uses curated Python exercises and a rule-based policy. The proposed study compares competence-aware and interaction-only assistance on a later unaided assessment. No participant study is running through this demo.</p>
-      <a href="https://github.com/HariSetti9/CoThink-AI">Source code and research protocol <span aria-hidden="true">↗</span></a>
+      <p>One engine powers both testbeds. The proposed study compares adaptive help, fixed hints, direct answers and unaided practice on new tasks completed independently. This demo uses curated content and stores session results only in your browser.</p>
+      <a href="https://github.com/HariSetti9/CoThink-AI/tree/research/adaptive-engine">Project vision, code and research protocol <span aria-hidden="true">↗</span></a>
     </section>
   </main>
   <footer class="frame footer">CoThink AI <span>AI-assisted development</span></footer>
