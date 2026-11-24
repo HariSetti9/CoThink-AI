@@ -1,4 +1,6 @@
-import { CONCEPTS, TASKS } from './tasks.mjs';
+import { CONCEPTS } from './tasks.mjs';
+import { isExpression, MAX_EXPRESSION_LENGTH, workedAnswer } from './answers.mjs';
+import { TRACKS, trackConcepts } from './tracks.mjs';
 import { PHASES, advance, createSession, currentTask, exportSession, requestAssistance, submitAnswer } from './session.mjs';
 import { summarize } from './analytics.mjs';
 
@@ -10,7 +12,7 @@ const descriptions = {
   direct: 'Shows a worked answer whenever you ask for assistance.',
 };
 const phaseGuidance = {
-  pre: 'Predict the output on your own, then rate how sure you are.',
+  pre: 'Work on your own, then rate how sure you are.',
   practice: 'Choose Request assistance for help with this question.',
   transfer: 'Apply what you practised to a new question on your own.',
 };
@@ -26,6 +28,12 @@ const helpReasons = {
   low_probe_score: 'Your pre-test answers suggest a worked answer may help with this topic.',
   mixed_probe_score: 'Some of your pre-test answers on this topic were correct, so the session starts with a hint.',
   high_probe_score: 'You did well on this topic in the pre-test, so the prompt asks you to explain your reasoning.',
+};
+const reviewTips = {
+  loops: 'Trace the start, exclusive stop, and step for a short range.',
+  lists: 'Write the indices above a short list, then predict what a positive or negative index selects.',
+  conditions: 'Test your condition at the boundary and with one value on each side.',
+  strings: 'Mark the character positions and check which endpoints a slice includes.',
 };
 const strategyLabels = { hint: 'Hint', verify: 'Verification', reflect: 'Reflection', worked: 'Worked answer' };
 let session;
@@ -49,14 +57,22 @@ function renderJourney(activePhase, complete = false) {
 
 function renderTask() {
   const task = currentTask(session);
+  const total = TRACKS[session.track].tasks.length;
+  const expression = isExpression(task);
   renderJourney(task.phase);
   $('stage').textContent = PHASES[task.phase] + ' · ' + CONCEPTS[task.concept];
-  $('item-position').textContent = (session.index + 1) + ' / ' + TASKS.length;
+  $('item-position').textContent = (session.index + 1) + ' / ' + total;
   $('progress').value = session.index;
-  $('question').textContent = task.prompt;
+  $('question').textContent = task.title ?? task.prompt;
+  $('exercise-instructions').hidden = !expression;
+  $('exercise-instructions').textContent = expression ? task.prompt : '';
   $('phase-guide').textContent = phaseGuidance[task.phase];
   $('code').textContent = task.code;
-  $('choices').replaceChildren(...task.choices.map((answer, index) => {
+  $('typed-answer').hidden = !expression;
+  $('multiple-choice').hidden = expression;
+  $('expression').value = '';
+  $('expression').disabled = false;
+  $('choices').replaceChildren(...(task.choices ?? []).map((answer, index) => {
     const label = document.createElement('label');
     const radio = document.createElement('input');
     radio.type = 'radio';
@@ -80,18 +96,21 @@ function showAssistance(override) {
   if (!request) return;
   const task = currentTask(session);
   const messages = {
-    worked: 'Worked answer · ' + task.choices[task.answer] + '. ' + task.hint,
+    worked: 'Worked answer · ',
     verify: 'Verification · Trace the expression one step at a time, then compare your prediction with the answer choices.',
     reflect: 'Reflection · Which Python rule explains your choice? Try stating the rule before submitting.',
     hint: 'Hint · ' + task.hint,
   };
   const reason = textElement('span', 'Why this help? ' + helpReasons[request.reason]);
   reason.className = 'help-reason';
-  $('feedback').replaceChildren(document.createTextNode(messages[request.strategy]), reason);
+  const feedback = $('feedback');
+  feedback.textContent = messages[request.strategy];
+  if (request.strategy === 'worked') feedback.append(textElement('code', workedAnswer(task)), ' · ' + task.hint);
+  feedback.append(reason);
 }
 
 function showResults() {
-  const stats = summarize(session.logs);
+  const stats = summarize(session.logs, trackConcepts(session.track));
   const fraction = metric => metric.total ? metric.correct + ' / ' + metric.total : '—';
   const signedChange = (stats.change > 0 ? '+' : '') + stats.change.toFixed(1) + ' pp';
   const metrics = [
@@ -121,21 +140,40 @@ function showResults() {
     row.append(textElement('dt', label), textElement('dd', count));
     return row;
   }));
+  const missedConcepts = stats.concepts.filter(item => item.transfer.correct < item.transfer.total);
+  $('review-complete').hidden = missedConcepts.length > 0;
+  $('review-items').replaceChildren(...missedConcepts.map(({ concept }) => {
+    const item = document.createElement('li');
+    item.append(textElement('strong', CONCEPTS[concept]), ' · ' + reviewTips[concept]);
+    return item;
+  }));
   $('lesson').hidden = $('empty-results').hidden = true;
   $('finished').hidden = $('results').hidden = false;
   $('finished-title').focus();
   renderJourney(null, true);
 }
 
-$('item-count').textContent = TASKS.length;
-$('concept-count').textContent = Object.keys(CONCEPTS).length;
-$('progress').max = TASKS.length;
+function selectedTrack() {
+  return document.querySelector('input[name="track"]:checked').value;
+}
+
+function showTrack() {
+  const track = selectedTrack();
+  const total = TRACKS[track].tasks.length;
+  $('item-count').textContent = total;
+  $('concept-count').textContent = trackConcepts(track).length;
+  $('progress').max = total;
+}
+
+$('expression').maxLength = MAX_EXPRESSION_LENGTH;
+$('tracks').addEventListener('change', showTrack);
+showTrack();
 $('mode').addEventListener('change', () => {
   $('mode-description').textContent = descriptions[$('mode').value];
 });
 $('mode').dispatchEvent(new Event('change'));
 $('start').addEventListener('click', () => {
-  session = createSession($('mode').value);
+  session = createSession($('mode').value, selectedTrack());
   $('setup').hidden = true;
   $('lesson').hidden = false;
   renderTask();
@@ -151,20 +189,22 @@ $('confidence').addEventListener('input', () => {
 });
 $('answer-form').addEventListener('submit', event => {
   event.preventDefault();
+  const task = currentTask(session);
+  if (!task || session.sealed) return;
   const selected = document.querySelector('input[name="answer"]:checked');
-  if (!selected) {
-    $('feedback').textContent = 'Select an answer first.';
-    $('choices').querySelector('input').focus();
+  const expression = isExpression(task);
+  const value = expression ? $('expression').value : (selected ? Number(selected.value) : null);
+  const result = submitAnswer(session, value, Number($('confidence').value));
+  if (!result) {
+    $('feedback').textContent = expression ? 'Enter one Python expression.' : 'Select an answer first.';
+    const field = expression ? $('expression') : $('choices').querySelector('input');
+    field.focus();
     return;
   }
-
-  const task = currentTask(session);
-  const result = submitAnswer(session, Number(selected.value), Number($('confidence').value));
-  if (!result) return;
   if (!result.sealed) {
-    selected.checked = false;
+    if (selected) selected.checked = false;
     $('feedback').textContent = 'Try another answer or request assistance.';
-    selected.focus();
+    (expression ? $('expression') : selected).focus();
     return;
   }
 
@@ -172,10 +212,10 @@ $('answer-form').addEventListener('submit', event => {
     ? (result.correct ? 'Correct. ' : 'Practice complete. ') + task.hint
     : 'Response recorded.';
   for (const input of $('choices').querySelectorAll('input')) input.disabled = true;
-  $('submit').disabled = $('confidence').disabled = true;
+  $('submit').disabled = $('confidence').disabled = $('expression').disabled = true;
   $('help').hidden = $('override').hidden = true;
   $('next').hidden = false;
-  $('next').firstChild.textContent = session.index + 1 === TASKS.length ? 'View results ' : 'Next exercise ';
+  $('next').firstChild.textContent = session.index + 1 === TRACKS[session.track].tasks.length ? 'View results ' : 'Next exercise ';
   $('next').focus();
 });
 $('help').addEventListener('click', () => showAssistance(false));

@@ -5,7 +5,7 @@ function score(logs, predicate = log => log.correct) {
   return { correct, total: logs.length, pct: logs.length ? 100 * correct / logs.length : null };
 }
 
-export function summarize(logs) {
+export function summarize(logs, concepts = Object.keys(CONCEPTS)) {
   const pre = logs.filter(log => log.phase === 'pre');
   const practice = logs.filter(log => log.phase === 'practice');
   const transfer = logs.filter(log => log.phase === 'transfer');
@@ -28,7 +28,7 @@ export function summarize(logs) {
     strategies: Object.fromEntries(['hint', 'verify', 'reflect', 'worked'].map(strategy => [
       strategy, practice.reduce((sum, log) => sum + (log.assistance ?? []).filter(value => value === strategy).length, 0),
     ])),
-    concepts: Object.keys(CONCEPTS).map(concept => ({
+    concepts: concepts.map(concept => ({
       concept,
       pre: score(pre.filter(log => log.concept === concept)),
       transfer: score(transfer.filter(log => log.concept === concept)),

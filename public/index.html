@@ -14,22 +14,29 @@
     <div class="frame header-inner">
       <a href="#main" class="brand"><span class="brand-mark" aria-hidden="true"></span>CoThink AI</a>
       <nav aria-label="Workspace"><a href="#session">Session</a><a href="#analytics">Analytics</a><a href="#research">Research</a></nav>
-      <span class="version">Prototype v0.5</span>
+      <span class="version">Prototype v0.6</span>
     </div>
   </header>
   <main id="main" class="frame">
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">PROGRAMMING EDUCATION RESEARCH</p>
-      <h1 id="page-title">Learning lab<span>.</span></h1>
-      <p>Predict what short Python programs print. Ask for help during practice, then try new questions on your own.</p>
-      <div class="inventory"><span><strong id="item-count">24</strong> exercises</span><span><strong id="concept-count">4</strong> concepts</span><span><strong>3</strong> phases</span></div>
+      <h1 id="page-title">Learn Python by doing<span>.</span></h1>
+      <p>Complete Python code, get help matched to what you already know, and solve new problems on your own.</p>
+      <div class="inventory" aria-live="polite"><span><strong id="item-count">12</strong> exercises</span><span><strong id="concept-count">2</strong> concepts</span><span><strong>3</strong> phases</span></div>
     </section>
     <div class="workspace">
       <section class="panel session" id="session" aria-labelledby="session-title">
         <div id="setup">
-          <p class="eyebrow">PYTHON CODE TRACING</p>
+          <p class="eyebrow">PYTHON PRACTICE</p>
           <h2 id="session-title" tabindex="-1">Session setup</h2>
           <p>Start with a short pre-test. In the next phase, select <strong>Request assistance</strong> whenever you want help.</p>
+          <fieldset id="tracks">
+            <legend>Practice track</legend>
+            <div class="track-options">
+              <label><input type="radio" name="track" value="coding" checked><span><strong>Complete Python code</strong><small>Write missing expressions in loops and conditions.</small></span></label>
+              <label><input type="radio" name="track" value="tracing"><span><strong>Predict program output</strong><small>Read short programs and choose what they print.</small></span></label>
+            </div>
+          </fieldset>
           <label for="mode">Assistance policy</label>
           <select id="mode" aria-describedby="mode-description">
             <option value="adaptive">Competence-aware</option>
@@ -45,9 +52,15 @@
           <progress id="progress" aria-label="Session progress"></progress>
           <h2 id="question" tabindex="-1"></h2>
           <p id="phase-guide" class="fine"></p>
+          <p id="exercise-instructions" hidden></p>
           <pre><code id="code"></code></pre>
           <form id="answer-form">
-            <fieldset><legend>Choose the output</legend><div class="choices" id="choices"></div></fieldset>
+            <fieldset id="multiple-choice"><legend>Choose the output</legend><div class="choices" id="choices"></div></fieldset>
+            <div id="typed-answer" hidden>
+              <label for="expression">Your Python expression</label>
+              <input id="expression" type="text" aria-describedby="expression-guide" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <p class="fine" id="expression-guide">Fill the blank with one expression. The checker recognizes common answer forms.</p>
+            </div>
             <label for="confidence">Confidence in your answer <output id="confidence-value" for="confidence">50%</output></label>
             <input id="confidence" type="range" value="50" min="0" max="100">
             <div class="actions">
@@ -60,7 +73,7 @@
           <button class="primary" type="button" id="next" hidden>Next exercise <span aria-hidden="true">→</span></button>
         </div>
         <div id="finished" hidden>
-          <p class="eyebrow">PYTHON CODE TRACING</p>
+          <p class="eyebrow">PYTHON PRACTICE</p>
           <h2 tabindex="-1" id="finished-title">Session complete</h2>
           <p>Review your results below or download a record of your answers and assistance requests.</p>
           <div class="actions">
@@ -73,7 +86,7 @@
         <p class="eyebrow">SESSION PROGRESS</p>
         <h2 id="journey-title">Learning sequence</h2>
         <ol>
-          <li data-phase="pre"><div><strong>Independent pre-test</strong><p>Establish your baseline.</p></div><span class="phase-status">Pending</span></li>
+          <li data-phase="pre"><div><strong>Independent pre-test</strong><p>Try the first questions on your own.</p></div><span class="phase-status">Pending</span></li>
           <li data-phase="practice"><div><strong>Assisted practice</strong><p>Request help as you work.</p></div><span class="phase-status">Pending</span></li>
           <li data-phase="transfer"><div><strong>Unaided transfer</strong><p>Apply what you know to new exercises.</p></div><span class="phase-status">Pending</span></li>
         </ol>
@@ -95,6 +108,11 @@
             <table><thead><tr><th scope="col">Concept</th><th scope="col">Pre-test</th><th scope="col">Transfer</th></tr></thead><tbody id="concept-results"></tbody></table>
           </div>
           <div><h3>Assistance requested</h3><dl id="strategy-results"></dl></div>
+        </div>
+        <div class="result-review">
+          <h3>What to practise next</h3>
+          <p id="review-complete" hidden>You answered every unaided question correctly. Try a short program that combines two concepts from this track.</p>
+          <ul id="review-items"></ul>
         </div>
         <p class="fine">Scores describe this session. Changes may reflect differences in item difficulty. The Brier score measures the gap between confidence and correctness, with lower values indicating better calibration on these items.</p>
       </div>

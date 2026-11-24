@@ -1,26 +1,28 @@
-import { DATASET_VERSION, TASKS } from './tasks.mjs';
+import { gradeAnswer } from './answers.mjs';
+import { TRACKS } from './tracks.mjs';
 import { chooseAssistance, MODES, POLICY_VERSION } from './policy.mjs';
 
-export const APP_VERSION = '0.5';
+export const APP_VERSION = '0.6';
 export const PHASES = { pre: 'Independent pre-test', practice: 'Assisted practice', transfer: 'Unaided transfer' };
 const MAX_PRACTICE_ATTEMPTS = 3;
 
-export function createSession(mode) {
+export function createSession(mode, track = 'tracing') {
   if (!Object.hasOwn(MODES, mode)) throw new RangeError('Unknown assistance policy');
-  return { mode, index: 0, logs: [], submissions: [], requests: [], sealed: false };
+  if (!Object.hasOwn(TRACKS, track)) throw new RangeError('Unknown practice track');
+  return { mode, track, index: 0, logs: [], submissions: [], requests: [], sealed: false };
 }
 
 export function currentTask(session) {
-  return TASKS[session.index];
+  return TRACKS[session.track].tasks[session.index];
 }
 
 export function submitAnswer(session, selected, confidence) {
   const task = currentTask(session);
   if (!task || session.sealed) return null;
-  if (!Number.isInteger(selected) || selected < 0 || selected >= task.choices.length) return null;
   if (!Number.isInteger(confidence) || confidence < 0 || confidence > 100) return null;
 
-  const correct = selected === task.answer;
+  const correct = gradeAnswer(task, selected);
+  if (correct === null) return null;
   const assisted = session.requests.length > 0;
   session.submissions.push({ correct, confidence, assisted });
   if (task.phase === 'practice' && !correct && session.submissions.length < MAX_PRACTICE_ATTEMPTS) {
@@ -69,7 +71,8 @@ export function exportSession(session) {
     version: APP_VERSION,
     schemaVersion: 2,
     policyVersion: POLICY_VERSION,
-    datasetVersion: DATASET_VERSION,
+    datasetVersion: TRACKS[session.track].datasetVersion,
+    track: session.track,
     mode: session.mode,
     logs: session.logs,
   };

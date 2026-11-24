@@ -34,3 +34,9 @@ The next implementation boundary is a separate protected study workflow with ser
 ## v0.5 usability follow-up
 
 The landing page shows how two learners can receive different support on the same Python concept. Instructions appear at each phase of the session. Each practice response explains the policy reason for the chosen type of help. Assessment items, policy rules, and export format are unchanged.
+
+## v0.6 coding milestone
+
+The product goal is independent problem-solving. A coding track now asks learners to complete actual Python expressions. It has four diagnostic exercises, four practice exercises and four fresh transfer exercises, with loops and Boolean conditions in each phase. The results page suggests a practice activity for each concept missed during unaided transfer. The tracing track retains its v0.5 dataset, policies and descriptive comparisons. Coding and tracing use separate dataset IDs and are unsuitable for pooled score comparisons.
+
+The checker recognizes documented common forms with harmless whitespace and whole-expression parentheses. It does not execute learner-entered code. Automated tests check every accepted form in Python against repository-owned reference cases. Code-entry correctness is a task-specific prototype measure. Rare equivalent expressions may need review, item difficulty and transfer have no psychometric validation, and the answer bank is accessible in the demo source. The next research milestone requires expert-reviewed new forms and a protected study workflow.
