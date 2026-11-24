@@ -27,6 +27,12 @@ Primary analysis uses linear regression of transfer percentage on assigned arm, 
 
 Define the smallest educationally meaningful effect with the study lead. Use external evidence and a feasibility pilot to select a plausible outcome variance, baseline correlation and attrition range. Run sensitivity-based sample-size calculations, account for clustering if recruiting by section, and specify a stopping rule and target before confirmatory enrollment. Avoid using an underpowered pilot effect as the sole power assumption.
 
+### Reproducible planning sensitivity
+
+Run `python research/power_sensitivity.py` for a CSV grid. Its assumptions are individually randomized equal groups, a two-sided normal approximation, common outcome variance, and a single baseline predictor. The effect input is a difference divided by the unadjusted outcome standard deviation. The variance reduction is approximated by 1 minus squared baseline–outcome correlation. The script rounds up the analyzable count before inflating it for expected attrition.
+
+The default inputs are illustrative, with no participant data or recommended recruitment target. For example, an effect of 0.4 standard deviations, baseline correlation 0.4, 80% power and 15% expected attrition yields 83 analyzable and 98 recruited learners per arm. Choose an effect and variance on substantive grounds and verify the final design by simulation, especially for ceiling effects, clustering or differential missingness.
+
 ## Instrument development and release gate
 
 - Start with expert item-by-concept review by two introductory Python educators. Review correctness, clarity, accessibility, distractor plausibility, transfer demand and unintended cues. Hold out new items and balance option positions, concepts and difficulty across parallel forms.
